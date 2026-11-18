@@ -13,8 +13,9 @@ drop trigger if exists linkroom_batches_touch_updated_at on public.batches;
 create trigger linkroom_batches_touch_updated_at before update on public.batches
 for each row execute function public.linkroom_touch_updated_at();
 
-create or replace function public.list_workspace_members(target_workspace uuid)
-returns table(user_id uuid, email text, role text)
+drop function if exists public.list_workspace_members(uuid);
+create function public.list_workspace_members(target_workspace uuid)
+returns table(user_id uuid, email text, role text, display_name text)
 language plpgsql stable security definer set search_path = public, auth
 as $$
 begin
@@ -22,7 +23,7 @@ begin
     raise exception 'not a workspace member' using errcode = '42501';
   end if;
   return query
-    select m.user_id, u.email::text, m.role
+    select m.user_id, u.email::text, m.role, coalesce(nullif(trim(u.raw_user_meta_data->>'display_name'),''),u.email)::text
     from public.workspace_members m
     join auth.users u on u.id = m.user_id
     where m.workspace_id = target_workspace
