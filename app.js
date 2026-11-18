@@ -68,10 +68,10 @@ function render(){
   document.querySelectorAll('.status-select').forEach(select=>select.addEventListener('change',()=>setStatus(select.dataset.id,select.value)));
   document.querySelectorAll('.assignee-select').forEach(select=>select.addEventListener('change',()=>setAssignee(select.dataset.id,select.value)));
   document.querySelectorAll('.note-edit').forEach(input=>input.addEventListener('change',()=>setNote(input.dataset.id,input.value)));
-  document.querySelectorAll('.attachment-action').forEach(b=>b.addEventListener('click',()=>{pendingRecordId=b.dataset.id;if(cloudMode){toast('云端附件功能尚未启用');return}document.querySelector('#imageInput').click()}));
+  document.querySelectorAll('.attachment-action').forEach(b=>b.addEventListener('click',()=>openAttachments(b.dataset.id)));
   document.querySelectorAll('.row-menu').forEach(b=>b.addEventListener('click',()=>{const id=b.closest('tr').dataset.id;const record=records.find(r=>r.id===id);if(!record)return;const action=prompt(`记录 ${id}\n输入 rename 编辑批次，delete 删除此记录，或留空取消。`);if(action==='delete')deleteRecord(id);else if(action==='rename')openBatchDialog(record.batch)}));
 }
-async function cloudLoad(){if(!cloudClient||!cloudWorkspaceId)return;const [{data:batchRows,error:batchError},{data:recordRows,error:recordError}]=await Promise.all([cloudClient.from('batches').select('id,name').eq('workspace_id',cloudWorkspaceId).order('created_at'),cloudClient.from('records').select('id,display_id,batch_id,url,note,status,assignee,updated_at').eq('workspace_id',cloudWorkspaceId).order('created_at',{ascending:false})]);if(batchError||recordError){console.error(batchError||recordError);toast('读取共享数据失败，请检查数据库策略');return}applyingCloudState=true;batches=batchRows.map(b=>({id:b.id,name:b.name,note:'共享批次'}));records=recordRows.map(r=>{const old=records.find(x=>x.dbId===r.id);const owner=cloudMembers.find(m=>m.id===r.assignee);return {id:`LR-${String(r.display_id).padStart(4,'0')}`,dbId:r.id,url:r.url,note:old&&cloudPendingWrites.has(`${r.id}:note`)?old.note:r.note,status:old&&cloudPendingWrites.has(`${r.id}:status`)?old.status:r.status,assignee:owner?.key||'',assigneeUserId:r.assignee,attachments:old?.attachments||0,updated:r.updated_at?new Date(r.updated_at).toLocaleString():'',updatedAt:r.updated_at,batch:r.batch_id}});render();syncCloudSelects();applyingCloudState=false;document.querySelector('#cloudModePill').textContent='云端已连接';document.querySelector('#cloudModePill').classList.add('cloud-online')}
+async function cloudLoad(){if(!cloudClient||!cloudWorkspaceId)return;const [{data:batchRows,error:batchError},{data:recordRows,error:recordError},{data:attachmentRows,error:attachmentError}]=await Promise.all([cloudClient.from('batches').select('id,name').eq('workspace_id',cloudWorkspaceId).order('created_at'),cloudClient.from('records').select('id,display_id,batch_id,url,note,status,assignee,updated_at').eq('workspace_id',cloudWorkspaceId).order('created_at',{ascending:false}),cloudClient.from('attachments').select('record_id').eq('workspace_id',cloudWorkspaceId)]);if(batchError||recordError){console.error(batchError||recordError);toast('读取共享数据失败，请检查数据库策略');return}applyingCloudState=true;batches=batchRows.map(b=>({id:b.id,name:b.name,note:'共享批次'}));records=recordRows.map(r=>{const old=records.find(x=>x.dbId===r.id);const owner=cloudMembers.find(m=>m.id===r.assignee);return {id:`LR-${String(r.display_id).padStart(4,'0')}`,dbId:r.id,url:r.url,note:old&&cloudPendingWrites.has(`${r.id}:note`)?old.note:r.note,status:old&&cloudPendingWrites.has(`${r.id}:status`)?old.status:r.status,assignee:owner?.key||'',assigneeUserId:r.assignee,attachments:attachmentError?0:attachmentRows.filter(a=>a.record_id===r.id).length,updated:r.updated_at?new Date(r.updated_at).toLocaleString():'',updatedAt:r.updated_at,batch:r.batch_id}});render();syncCloudSelects();applyingCloudState=false;document.querySelector('#cloudModePill').textContent='云端已连接';document.querySelector('#cloudModePill').classList.add('cloud-online')}
 function syncCloudSelects(){if(!cloudMode||!cloudMembers.length)return;const options=cloudMembers.map(m=>`<option value="${escapeAttr(m.id)}">${escapeHTML(m.name)}</option>`).join('');const select=document.querySelector('#recordForm select[name="assignee"]');if(select){const old=select.value;select.innerHTML='<option value="">未分配</option>'+options;if([...select.options].some(o=>o.value===old))select.value=old}const menu=document.querySelector('#assigneeMenu');menu.innerHTML='<button data-assignee="all">所有成员</button>'+cloudMembers.map(m=>`<button data-assignee="${escapeAttr(m.id)}">${escapeHTML(m.name)}</button>`).join('')}
 async function cloudUpdateRecord(id,patch){const r=records.find(x=>x.id===id);if(!cloudMode||!r?.dbId||!['admin','editor'].includes(cloudRole))return;const key=Object.keys(patch).map(field=>`${r.dbId}:${field}`);key.forEach(k=>cloudPendingWrites.add(k));let reload=false;try{const user=(await cloudClient.auth.getUser()).data.user;let query=cloudClient.from('records').update({...patch,updated_by:user.id}).eq('id',r.dbId).eq('workspace_id',cloudWorkspaceId);if(r.updatedAt)query=query.eq('updated_at',r.updatedAt);const {data,error}=await query.select('id,updated_at').maybeSingle();if(error)throw error;if(!data){toast(`${r.id} 已被其他成员修改，本次未覆盖；已同步服务器版本`);reload=true;return}r.updatedAt=data.updated_at;r.updated=new Date(data.updated_at).toLocaleString()}catch(error){console.error(error);toast(`云端保存失败：${error.message||'请检查权限'}`);reload=true}finally{key.forEach(k=>cloudPendingWrites.delete(k));if(reload)await cloudLoad()}}
 function showCloudNotice(title,detail){const notice=document.querySelector('#cloudLoginNotice');if(cloudWorkspaceId){notice.hidden=true;return}notice.hidden=false;document.querySelector('#cloudNoticeTitle').textContent=title;document.querySelector('#cloudNoticeDetail').textContent=detail;document.querySelector('#noticeLoginButton').textContent=cloudUserId?'重新检查工作区':'邮箱登录'}
@@ -132,6 +132,46 @@ function updateStats(){
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function escapeAttr(s){return escapeHTML(s)}
 function safeLink(value){try{const url=new URL(String(value).trim());return ['http:','https:'].includes(url.protocol)?url.href:null}catch{return null}}
+const attachmentBucket='record-attachments';
+const allowedAttachmentTypes=new Set(['image/jpeg','image/png','image/webp','image/heic','application/pdf']);
+async function openAttachments(id){
+  const record=records.find(r=>r.id===id);if(!record)return;
+  pendingRecordId=id;
+  document.querySelector('#attachmentDialogTitle').textContent=`${id} 的附件`;
+  document.querySelector('#attachmentUploadLabel').hidden=cloudMode&&!['admin','editor'].includes(cloudRole);
+  document.querySelector('#attachmentUploadStatus').textContent='';
+  document.querySelector('#attachmentDialog').showModal();
+  await loadAttachments(record);
+}
+async function loadAttachments(record){
+  const list=document.querySelector('#attachmentList');
+  if(!cloudMode){list.textContent='本机演示模式不保存附件文件，请登录云端工作区。';document.querySelector('#attachmentUploadLabel').hidden=true;return}
+  if(!cloudWorkspaceId||!record.dbId){list.textContent='请先登录并打开云端记录。';return}
+  list.textContent='正在读取附件…';
+  const {data,error}=await cloudClient.from('attachments').select('id,original_name,size_bytes,storage_path,content_type').eq('workspace_id',cloudWorkspaceId).eq('record_id',record.dbId).order('created_at',{ascending:false});
+  if(error){list.textContent=`读取失败：${error.message}`;return}
+  record.attachments=data.length;
+  list.innerHTML=data.length?data.map(file=>`<button type="button" class="attachment-file" data-path="${escapeAttr(file.storage_path)}"><span>${escapeHTML(file.original_name)}</span><small>${(file.size_bytes/1048576).toFixed(1)} MB · 点击查看</small></button>`).join(''):'<p>暂无附件，可选择文件上传。</p>';
+  document.querySelectorAll('#attachmentList [data-path]').forEach(button=>button.addEventListener('click',async()=>{const {data:blob,error:downloadError}=await cloudClient.storage.from(attachmentBucket).download(button.dataset.path);if(downloadError){toast(`打开附件失败：${downloadError.message}`);return}const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=button.querySelector('span').textContent;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000)}));
+  render();
+}
+document.querySelector('#attachmentFileInput').addEventListener('change',async event=>{
+  const input=event.currentTarget;const files=[...input.files];const record=records.find(r=>r.id===pendingRecordId);
+  if(!cloudMode||!cloudWorkspaceId||!record?.dbId||!['admin','editor'].includes(cloudRole)){toast('当前账号不能上传附件');input.value='';return}
+  const {data:{user},error:authError}=await cloudClient.auth.getUser();if(authError||!user){toast('请重新登录后上传');input.value='';return}
+  const status=document.querySelector('#attachmentUploadStatus');
+  for(const file of files){
+    if(!allowedAttachmentTypes.has(file.type)||file.size===0||file.size>15728640){status.textContent=`${file.name}：仅支持图片或 PDF，单个文件不超过 15 MB`;continue}
+    status.textContent=`正在上传 ${file.name}…`;
+    const path=`${cloudWorkspaceId}/${record.dbId}/${crypto.randomUUID()}`;
+    const {error:uploadError}=await cloudClient.storage.from(attachmentBucket).upload(path,file,{contentType:file.type,upsert:false});
+    if(uploadError){status.textContent=`${file.name} 上传失败：${uploadError.message}`;continue}
+    const {error:metadataError}=await cloudClient.from('attachments').insert({workspace_id:cloudWorkspaceId,record_id:record.dbId,storage_path:path,original_name:file.name,content_type:file.type,size_bytes:file.size,uploaded_by:user.id});
+    if(metadataError){await cloudClient.storage.from(attachmentBucket).remove([path]);status.textContent=`${file.name} 保存失败：${metadataError.message}`;continue}
+    status.textContent=`${file.name} 已保存`;
+  }
+  input.value='';await loadAttachments(record);
+});
 function toast(message){const el=document.querySelector('#toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2500)}
 function setStatus(id,status){const r=records.find(x=>x.id===id);if(!r||r.status===status)return;r.status=status;r.updated='刚刚';activity.unshift({who:'Lin Chen',verb:`更新了状态为「${r.status}」`,record:r.id,when:'刚刚',member:'lin'});render();scheduleCloudSave(id,{status});toast(`${r.id} 已更新为「${r.status}」`)}
 function setAssignee(id,assignee){const r=records.find(x=>x.id===id);if(!r||r.assignee===assignee)return;if(cloudMode&&!['admin','editor'].includes(cloudRole)){toast('当前账号只有查看权限');render();return}r.assignee=assignee;r.updated='刚刚';render();scheduleCloudSave(id,{assignee:assignee||null});toast(`${r.id} 负责人已更新`)}

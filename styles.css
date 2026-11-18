@@ -17,3 +17,4 @@
 .page-wrap>.quick-link-form{margin:0 0 20px;padding:16px;background:#fff;border:1px solid #e8e9ee;border-radius:9px}.page-wrap>.quick-link-form input{font-size:12px}
 .profile-panel{padding:22px}.profile-detail{display:grid;gap:7px;padding:14px;border:1px solid #e8e9ee;border-radius:8px;margin-bottom:20px}.profile-detail span{font-size:10px;color:#8b8f9c}.profile-detail strong{font-size:12px;color:#303448;overflow-wrap:anywhere}
 [hidden]{display:none!important}
+.attachment-list{display:grid;gap:7px;max-height:280px;overflow:auto}.attachment-list p{font-size:11px;color:#858998}.attachment-file{width:100%;display:grid;gap:5px;text-align:left;padding:10px;border:1px solid #e8e9ee;border-radius:7px;background:#fff;color:#454858}.attachment-file span{font-size:11px;overflow-wrap:anywhere}.attachment-file small{font-size:9px;color:#9296a2}.attachment-file:hover{border-color:#9c92e8}

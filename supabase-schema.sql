@@ -122,7 +122,7 @@ create policy "editors can create records" on public.records for insert with che
 create policy "editors can update records" on public.records for update using (public.can_edit_workspace(workspace_id)) with check (public.can_edit_workspace(workspace_id) and updated_by=auth.uid());
 create policy "editors can delete records" on public.records for delete using (public.can_edit_workspace(workspace_id));
 create policy "members can view attachment metadata" on public.attachments for select using (public.is_workspace_member(workspace_id));
-create policy "editors can add attachment metadata" on public.attachments for insert with check (public.can_edit_workspace(workspace_id) and uploaded_by=auth.uid());
+create policy "editors can add attachment metadata" on public.attachments for insert to authenticated with check (public.can_edit_workspace(workspace_id) and uploaded_by=auth.uid() and storage_path like workspace_id::text || '/' || record_id::text || '/%' and exists (select 1 from public.records r where r.id=record_id and r.workspace_id=attachments.workspace_id));
 create policy "members can view activity" on public.record_activity for select using (public.is_workspace_member(workspace_id));
 create policy "editors can add activity" on public.record_activity for insert with check (public.can_edit_workspace(workspace_id) and actor=auth.uid());
 
@@ -149,8 +149,8 @@ on conflict (id) do update set public=false,file_size_limit=15728640,allowed_mim
 
 create policy "members can read workspace attachments" on storage.objects for select
 using (bucket_id='record-attachments' and public.is_workspace_member((storage.foldername(name))[1]::uuid));
-create policy "editors can upload workspace attachments" on storage.objects for insert
-with check (bucket_id='record-attachments' and public.can_edit_workspace((storage.foldername(name))[1]::uuid));
+create policy "editors can upload workspace attachments" on storage.objects for insert to authenticated
+with check (bucket_id='record-attachments' and coalesce(array_length(storage.foldername(name),1),0)=2 and exists (select 1 from public.records r where r.workspace_id::text=(storage.foldername(name))[1] and r.id::text=(storage.foldername(name))[2] and public.can_edit_workspace(r.workspace_id)));
 create policy "editors can update workspace attachments" on storage.objects for update
 using (bucket_id='record-attachments' and public.can_edit_workspace((storage.foldername(name))[1]::uuid))
 with check (bucket_id='record-attachments' and public.can_edit_workspace((storage.foldername(name))[1]::uuid));
