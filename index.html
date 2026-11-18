@@ -14,46 +14,30 @@
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <a class="brand" href="#" aria-label="Linkroom 首页">
+      <a class="brand" href="#overview" aria-label="Linkroom 首页">
         <span class="brand-mark"><span></span><span></span><span></span><span></span></span>
         <span>linkroom<span class="brand-dot">.</span></span>
       </a>
 
-      <button class="workspace-switcher" type="button">
+      <div class="workspace-switcher">
         <span class="workspace-avatar">L</span>
         <span class="workspace-name"><strong>Linkroom 工作区</strong><small>个人空间</small></span>
         <span class="switch-chevron">⌄</span>
-      </button>
+      </div>
 
       <div class="sidebar-label">工作区</div>
       <nav class="primary-nav" aria-label="主导航">
-        <a class="nav-link active" href="#"><span class="nav-icon">▤</span>项目总览</a>
-        <a class="nav-link" href="#"><span class="nav-icon">◷</span>最近打开</a>
-        <a class="nav-link" href="#"><span class="nav-icon">☆</span>收藏</a>
-        <a class="nav-link" href="#"><span class="nav-icon">⌕</span>搜索记录</a>
+        <a class="nav-link active" href="#overview"><span class="nav-icon">▤</span>项目总览</a>
+        <a class="nav-link" href="#records" id="sidebarSearch"><span class="nav-icon">⌕</span>搜索记录</a>
         <button class="nav-link settings-nav" id="settingsButton" type="button"><span class="nav-icon">⚙</span>工作区设置</button>
       </nav>
 
       <div class="sidebar-divider"></div>
-      <div class="sidebar-label project-label"><span>我的项目</span><button class="icon-button tiny" type="button" aria-label="添加项目">＋</button></div>
+      <div class="sidebar-label project-label"><span>我的项目</span></div>
       <nav class="project-nav" aria-label="项目列表">
-        <a class="project-link selected" href="#"><span class="project-glyph indigo">✳</span><span>验证协作台</span><span class="project-more">···</span></a>
-        <a class="project-link" href="#"><span class="project-glyph green">↗</span><span>Partner onboarding</span></a>
+        <a class="project-link selected" href="#overview"><span class="project-glyph indigo">✳</span><span>验证协作台</span></a>
       </nav>
 
-      <div class="sidebar-bottom">
-        <div class="storage-card">
-          <div class="storage-heading"><span>空间使用情况</span><span>18%</span></div>
-          <div class="storage-track"><span></span></div>
-          <small>1.8 GB / 10 GB 已使用</small>
-          <button type="button">管理空间 <span>↗</span></button>
-        </div>
-        <button class="profile-button" type="button">
-          <span class="avatar avatar-purple">林</span>
-          <span class="profile-copy"><strong>Lin Chen</strong><small>免费工作区</small></span>
-          <span class="switch-chevron">···</span>
-        </button>
-      </div>
     </aside>
 
     <main class="main-content">
@@ -62,34 +46,31 @@
         <div class="topbar-actions">
           <span class="cloud-mode-pill" id="cloudModePill">本机演示</span>
           <button class="toolbar-button" id="authButton" type="button">登录</button>
-          <button class="icon-button help-button" type="button" aria-label="帮助">?</button>
-          <button class="icon-button notification-button" type="button" aria-label="通知">♧<i></i></button>
-          <span class="topbar-divider"></span>
-          <button class="avatar avatar-purple top-avatar" type="button" aria-label="个人资料">林</button>
         </div>
       </header>
 
-      <div class="page-wrap">
+      <div class="page-wrap" id="overview">
         <div class="cloud-login-notice" id="cloudLoginNotice" hidden><span class="notice-lock">⌑</span><span><strong id="cloudNoticeTitle">请登录后查看工作区</strong><small id="cloudNoticeDetail">共享记录只对已加入工作区的成员开放。</small></span><button class="button button-primary" id="noticeLoginButton" type="button">邮箱登录</button></div>
         <section class="project-heading">
           <div class="heading-main">
             <div class="project-icon-large">✳</div>
             <div>
-              <div class="title-line"><h1>验证协作台</h1><button class="icon-button title-more" type="button" aria-label="更多项目操作">···</button></div>
+              <div class="title-line"><h1>验证协作台</h1></div>
               <p>和伙伴一起管理验证链接与处理进度。</p>
             </div>
           </div>
           <div class="heading-tools">
-            <div class="presence-stack" aria-label="2 位成员在线"><span class="avatar avatar-purple">林</span><span class="avatar avatar-peach">J</span><span class="online-dot"></span></div>
-            <span class="member-count">2 位成员</span>
+            <div class="presence-stack" id="memberAvatars" aria-label="工作区成员"></div>
+            <span class="member-count" id="memberCount">0 位成员</span>
             <button class="button button-outline" id="inviteButton" type="button"><span>＋</span> 邀请成员</button>
             <button class="button button-primary" id="newRecordButton" type="button"><span>＋</span> 新建记录</button>
           </div>
         </section>
 
+        <form id="quickLinkForm" class="quick-link-form"><label for="quickLinkInput">快速创建验证链接</label><div><input id="quickLinkInput" type="text" placeholder="在这里粘贴链接或其他内容" required /><button class="button button-primary" type="submit">创建记录</button></div></form>
         <section class="stats-grid" aria-label="批次统计">
-          <article class="stat-card"><div class="stat-top"><span class="stat-label">记录总数</span><span class="stat-icon neutral">▤</span></div><div class="stat-bottom"><strong id="statTotal">128</strong><span class="stat-note">条记录</span><span class="stat-trend">↗ 本周 +12</span></div></article>
-          <article class="stat-card"><div class="stat-top"><span class="stat-label">已通过</span><span class="stat-icon success">✓</span></div><div class="stat-bottom"><strong id="statPassed">86</strong><span class="stat-note">条</span><span class="stat-trend positive">67.2%</span></div></article>
+          <article class="stat-card"><div class="stat-top"><span class="stat-label">记录总数</span><span class="stat-icon neutral">▤</span></div><div class="stat-bottom"><strong id="statTotal">0</strong><span class="stat-note">条记录</span></div></article>
+          <article class="stat-card"><div class="stat-top"><span class="stat-label">已通过</span><span class="stat-icon success">✓</span></div><div class="stat-bottom"><strong id="statPassed">0</strong><span class="stat-note">条</span></div></article>
           <article class="stat-card"><div class="stat-top"><span class="stat-label">待处理</span><span class="stat-icon pending">◷</span></div><div class="stat-bottom"><strong id="statPending">24</strong><span class="stat-note">条</span><span class="stat-trend muted">需要跟进</span></div></article>
           <article class="stat-card"><div class="stat-top"><span class="stat-label">待确认</span><span class="stat-icon review">◎</span></div><div class="stat-bottom"><strong id="statReview">8</strong><span class="stat-note">条</span><span class="stat-trend warning">双方确认</span></div></article>
         </section>
@@ -104,8 +85,8 @@
           </div>
         </section>
 
-        <section class="records-section">
-          <div class="records-title-row"><div class="records-title"><h2>全部记录</h2><span class="live-pill"><i></i> 实时协作</span></div><button class="icon-button view-more" type="button" aria-label="更多视图">···</button></div>
+        <section class="records-section" id="records">
+          <div class="records-title-row"><div class="records-title"><h2>全部记录</h2><span class="live-pill"><i></i> 实时协作</span></div></div>
           <div class="table-toolbar">
             <div class="toolbar-left">
               <label class="search-box"><span>⌕</span><input id="searchInput" type="search" placeholder="搜索链接、备注或负责人" /></label>
@@ -123,35 +104,35 @@
             </table>
             <div class="empty-state" id="emptyState" hidden><div>⌕</div><strong>没有找到匹配的记录</strong><span>试试调整关键词或筛选条件。</span></div>
           </div>
-          <footer class="table-footer"><span id="showingCount">显示 1–6 条，共 128 条记录</span><div class="pagination"><button type="button" disabled aria-label="上一页">‹</button><button class="current-page" type="button">1</button><button type="button">2</button><button type="button">3</button><span>…</span><button type="button">22</button><button type="button" aria-label="下一页">›</button><select aria-label="每页行数"><option>每页 6 条</option><option>每页 12 条</option><option>每页 24 条</option></select></div></footer>
+          <footer class="table-footer"><span id="showingCount">显示 0 条记录</span><div class="pagination" id="paginationControls"></div></footer>
         </section>
 
-        <div class="collab-note"><span class="collab-icon">↗</span><span><strong>你们正在共同编辑</strong><small>所有改动都会自动同步，并保留修改记录。</small></span><div class="note-avatars"><span class="avatar avatar-purple">林</span><span class="avatar avatar-peach">J</span></div><button type="button" id="activityButton">查看活动记录 <span>→</span></button></div>
+        <div class="collab-note"><span class="collab-icon">↗</span><span><strong id="collabTitle">工作区动态</strong><small id="collabDetail">查看最近的记录变更。</small></span><button type="button" id="activityButton">查看活动记录 <span>→</span></button></div>
       </div>
     </main>
   </div>
 
   <div class="toast" id="toast" role="status"></div>
   <input id="imageInput" type="file" accept="image/*" multiple hidden />
-  <dialog id="importDialog" class="modal import-modal"><form method="dialog" id="importForm"><div class="modal-heading"><div><span class="modal-eyebrow">从微信或文件快速整理</span><h2>批量导入链接</h2></div><button class="icon-button close-modal" value="cancel" aria-label="关闭">×</button></div><p class="modal-description">粘贴微信聊天内容、普通文本或 CSV 内容。系统会自动提取链接并跳过已存在的重复链接。</p><label class="field-label">聊天内容或链接<textarea id="pasteLinks" rows="7" placeholder="把微信聊天内容粘贴到这里……&#10;&#10;支持一段文字中包含多个链接"></textarea></label><label class="field-label">导入到批次<select id="importBatch"><option value="dec">待分配</option><option value="oct">10 月 · 第一批</option><option value="nov">11 月 · 第二批</option></select></label><div class="import-preview" id="importPreview">粘贴内容后预览识别结果</div><div class="modal-actions"><button class="button button-outline" id="chooseCsvButton" type="button">选择 CSV 文件</button><button class="button button-primary" id="confirmImportButton" type="button" disabled>导入链接</button></div><input id="csvInput" type="file" accept=".csv,text/csv" hidden /></form></dialog>
-  <dialog id="batchDialog" class="modal"><form method="dialog" id="batchForm"><div class="modal-heading"><div><span class="modal-eyebrow">批次管理</span><h2 id="batchDialogTitle">新建批次</h2></div><button class="icon-button close-modal" value="cancel" aria-label="关闭">×</button></div><label class="field-label">批次名称<input id="batchNameInput" maxlength="60" placeholder="例如：12 月 · 第三批" required /></label><div class="modal-actions"><button class="button button-outline" value="cancel">取消</button><button class="button button-primary" id="saveBatchButton" value="default">创建批次</button></div></form></dialog>
+  <dialog id="importDialog" class="modal import-modal"><form method="dialog" id="importForm"><div class="modal-heading"><div><span class="modal-eyebrow">从微信或文件快速整理</span><h2>批量导入链接</h2></div><button class="icon-button close-modal" type="button" aria-label="关闭">×</button></div><p class="modal-description">粘贴微信聊天内容、普通文本或 CSV 内容。系统会自动提取链接并跳过已存在的重复链接。</p><label class="field-label">聊天内容或链接<textarea id="pasteLinks" rows="7" placeholder="把微信聊天内容粘贴到这里……&#10;&#10;支持一段文字中包含多个链接"></textarea></label><label class="field-label">导入到批次<select id="importBatch"><option value="dec">待分配</option><option value="oct">10 月 · 第一批</option><option value="nov">11 月 · 第二批</option></select></label><div class="import-preview" id="importPreview">粘贴内容后预览识别结果</div><div class="modal-actions"><button class="button button-outline" id="chooseCsvButton" type="button">选择 CSV 文件</button><button class="button button-primary" id="confirmImportButton" type="button" disabled>导入链接</button></div><input id="csvInput" type="file" accept=".csv,text/csv" hidden /></form></dialog>
+  <dialog id="batchDialog" class="modal"><form method="dialog" id="batchForm"><div class="modal-heading"><div><span class="modal-eyebrow">批次管理</span><h2 id="batchDialogTitle">新建批次</h2></div><button class="icon-button close-modal" type="button" aria-label="关闭">×</button></div><label class="field-label">批次名称<input id="batchNameInput" maxlength="60" placeholder="例如：12 月 · 第三批" required /></label><div class="modal-actions"><button class="button button-outline" type="button" data-close-dialog>取消</button><button class="button button-primary" id="saveBatchButton" value="default">创建批次</button></div></form></dialog>
   <dialog id="recordDialog" class="modal">
     <form method="dialog" id="recordForm">
-      <div class="modal-heading"><div><span class="modal-eyebrow">新建协作记录</span><h2>添加验证链接</h2></div><button class="icon-button close-modal" value="cancel" aria-label="关闭">×</button></div>
-      <label class="field-label">验证链接 <span>必填</span><input name="url" type="url" placeholder="https://example.com/verification" required /></label>
+      <div class="modal-heading"><div><span class="modal-eyebrow">新建协作记录</span><h2>添加验证链接</h2></div><button class="icon-button close-modal" type="button" aria-label="关闭">×</button></div>
+      <label class="field-label">验证链接 <span>必填</span><input name="url" type="text" placeholder="粘贴链接或其他内容" required /></label>
       <div class="field-row"><label class="field-label">批次<select name="batch"><option value="dec">待分配</option><option value="oct">10 月 · 第一批</option><option value="nov">11 月 · 第二批</option></select></label><label class="field-label">负责人<select name="assignee"><option value="lin">Lin Chen</option><option value="james">James Miller</option></select></label></div>
       <label class="field-label">备注<textarea name="note" rows="3" placeholder="补充需要双方留意的信息…"></textarea></label>
-      <div class="modal-actions"><button class="button button-outline" value="cancel">取消</button><button class="button button-primary" id="saveRecordButton" value="default">创建记录</button></div>
+      <div class="modal-actions"><button class="button button-outline" type="button" data-close-dialog>取消</button><button class="button button-primary" id="saveRecordButton" value="default">创建记录</button></div>
     </form>
   </dialog>
 
   <dialog id="inviteDialog" class="modal invite-modal">
-    <form method="dialog"><div class="modal-heading"><div><span class="modal-eyebrow">一起协作</span><h2>添加工作区成员</h2></div><button class="icon-button close-modal" value="cancel" aria-label="关闭">×</button></div><p class="modal-description">对方先用这个邮箱登录过一次，再输入邮箱授予工作区权限。管理员需先在 Supabase Authentication → Users 中邀请对方注册。</p><label class="field-label">成员邮箱<input id="inviteEmail" type="email" placeholder="partner@example.com" required /></label><label class="field-label">访问权限<select id="inviteRole"><option value="editor">可编辑</option><option value="viewer">仅查看</option></select></label><div class="modal-actions"><button class="button button-outline" value="cancel">取消</button><button class="button button-primary" id="sendInviteButton" value="default">添加成员</button></div></form>
+    <form method="dialog"><div class="modal-heading"><div><span class="modal-eyebrow">一起协作</span><h2>添加工作区成员</h2></div><button class="icon-button close-modal" type="button" aria-label="关闭">×</button></div><p class="modal-description">对方先用这个邮箱登录过一次，再输入邮箱授予工作区权限。管理员需先在 Supabase Authentication → Users 中邀请对方注册。</p><label class="field-label">成员邮箱<input id="inviteEmail" type="email" placeholder="partner@example.com" required /></label><label class="field-label">访问权限<select id="inviteRole"><option value="editor">可编辑</option><option value="viewer">仅查看</option></select></label><div class="modal-actions"><button class="button button-outline" type="button" data-close-dialog>取消</button><button class="button button-primary" id="sendInviteButton" value="default">添加成员</button></div></form>
   </dialog>
 
-  <dialog id="activityDialog" class="modal activity-modal"><form method="dialog"><div class="modal-heading"><div><span class="modal-eyebrow">最近动态</span><h2>活动记录</h2></div><button class="icon-button close-modal" value="cancel" aria-label="关闭">×</button></div><div class="activity-list" id="activityList"></div></form></dialog>
-  <dialog id="authDialog" class="modal"><form method="dialog" id="authForm"><div class="modal-heading"><div><span class="modal-eyebrow">安全访问</span><h2>登录协作工作区</h2></div><button class="icon-button close-modal" value="cancel" aria-label="关闭">×</button></div><p class="modal-description">使用邮箱接收一次性登录链接。登录后，页面将读取你所属的共享工作区。</p><label class="field-label">邮箱<input id="authEmail" type="email" placeholder="you@example.com" required /></label><div class="modal-actions"><button class="button button-outline" value="cancel">取消</button><button class="button button-primary" id="authSubmit" value="default">发送登录链接</button></div></form></dialog>
-  <dialog id="settingsDialog" class="modal settings-modal"><form method="dialog" id="settingsForm"><div class="modal-heading"><div><span class="modal-eyebrow">项目管理</span><h2>工作区设置</h2></div><button class="icon-button close-modal" value="cancel" aria-label="关闭">×</button></div><div class="settings-section"><h3>基本信息</h3><label class="field-label">工作区名称<input id="workspaceNameInput" value="Linkroom 工作区" maxlength="50" /></label><p class="settings-hint">名称保存在当前浏览器；云端名称可在数据库工作区表中管理。</p></div><div class="settings-section"><h3>成员与权限</h3><div class="member-setting"><span class="avatar avatar-purple">林</span><span><strong>Lin Chen</strong><small>当前用户 · 管理员</small></span><span class="role-pill">管理员</span></div><div class="member-setting"><span class="avatar avatar-peach">J</span><span><strong>James Miller</strong><small>协作伙伴</small></span><select aria-label="协作伙伴权限"><option>编辑者</option><option>查看者</option></select></div><button class="button button-outline settings-invite" id="settingsInviteButton" type="button">＋ 邀请成员</button><p class="settings-hint">云端成员邀请需先启用 Supabase，并由管理员添加成员。</p></div><div class="settings-section"><h3>记录状态</h3><div class="status-settings"><span>待处理</span><span>处理中</span><span>待确认</span><span>已通过</span><span>未通过</span><span>账号受限</span></div><p class="settings-hint">当前状态列表固定；状态顺序可通过拖动调整（自定义状态暂未启用）。</p></div><div class="settings-section"><h3>附件与隐私</h3><label class="setting-check"><input type="checkbox" id="privateAttachmentsToggle" checked disabled /><span><strong>附件仅成员可见</strong><small>云端附件桶配置为私有，尚未启用上传。</small></span></label><label class="field-label retention-field">附件保留期限<select id="retentionSelect"><option value="30">30 天</option><option value="90" selected>90 天</option><option value="365">1 年</option><option value="forever">持续保留</option></select></label></div><div class="settings-section connection-section"><h3>云端连接</h3><div class="connection-row"><span class="connection-light"></span><span><strong id="settingsConnectionState">本机演示模式</strong><small id="settingsConnectionDetail">尚未连接 Supabase，数据只在本浏览器保存。</small></span><button type="button" id="settingsAuthButton">配置登录</button></div></div><div class="modal-actions"><button class="button button-outline" value="cancel">取消</button><button class="button button-primary" id="saveSettingsButton" value="default">保存设置</button></div></form></dialog>
+  <dialog id="activityDialog" class="modal activity-modal"><form method="dialog"><div class="modal-heading"><div><span class="modal-eyebrow">最近动态</span><h2>活动记录</h2></div><button class="icon-button close-modal" type="button" aria-label="关闭">×</button></div><div class="activity-list" id="activityList"></div></form></dialog>
+  <dialog id="authDialog" class="modal"><form method="dialog" id="authForm"><div class="modal-heading"><div><span class="modal-eyebrow">安全访问</span><h2>登录协作工作区</h2></div><button class="icon-button close-modal" type="button" aria-label="关闭">×</button></div><p class="modal-description">使用邮箱接收一次性登录链接。登录后，页面将读取你所属的共享工作区。</p><label class="field-label">邮箱<input id="authEmail" type="email" placeholder="you@example.com" required /></label><div class="modal-actions"><button class="button button-outline" type="button" data-close-dialog>取消</button><button class="button button-primary" id="authSubmit" value="default">发送登录链接</button></div></form></dialog>
+  <dialog id="settingsDialog" class="modal settings-modal"><form method="dialog" id="settingsForm"><div class="modal-heading"><div><span class="modal-eyebrow">项目管理</span><h2>工作区设置</h2></div><button class="icon-button close-modal" type="button" aria-label="关闭">×</button></div><div class="settings-section"><h3>基本信息</h3><label class="field-label">工作区名称<input id="workspaceNameInput" value="Linkroom 工作区" maxlength="50" /></label><p class="settings-hint">名称保存在当前浏览器；云端名称可在数据库工作区表中管理。</p></div><div class="settings-section"><h3>成员与权限</h3><div id="settingsMemberList"></div><button class="button button-outline settings-invite" id="settingsInviteButton" type="button">＋ 邀请成员</button><p class="settings-hint">成员权限由工作区管理员管理。</p></div><div class="settings-section"><h3>记录状态</h3><div class="status-settings"><span>待处理</span><span>处理中</span><span>待确认</span><span>已通过</span><span>未通过</span><span>账号受限</span></div><p class="settings-hint">状态名称仅保存在当前浏览器。</p></div><div class="settings-section"><h3>附件与隐私</h3><label class="setting-check"><input type="checkbox" id="privateAttachmentsToggle" checked disabled /><span><strong>附件仅成员可见</strong><small>云端附件桶配置为私有，尚未启用上传。</small></span></label><label class="field-label retention-field">附件保留期限<select id="retentionSelect"><option value="30">30 天</option><option value="90" selected>90 天</option><option value="365">1 年</option><option value="forever">持续保留</option></select></label></div><div class="settings-section connection-section"><h3>云端连接</h3><div class="connection-row"><span class="connection-light"></span><span><strong id="settingsConnectionState">本机演示模式</strong><small id="settingsConnectionDetail">尚未连接 Supabase，数据只在本浏览器保存。</small></span><button type="button" id="settingsAuthButton">配置登录</button></div></div><div class="modal-actions"><button class="button button-outline" type="button" data-close-dialog>取消</button><button class="button button-primary" id="saveSettingsButton" value="default">保存设置</button></div></form></dialog>
   <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
